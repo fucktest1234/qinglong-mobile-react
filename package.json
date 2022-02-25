@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^0.19.1",
+    "@headlessui/react": "^1.5.0",
+    "@heroicons/react": "^1.0.5",
     "@uiw/react-codemirror": "^4.0.0-rc.11",
     "antd-mobile": "^5.0.0-beta.1",
     "axios": "^0.21.1",

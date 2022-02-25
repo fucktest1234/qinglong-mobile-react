@@ -15,9 +15,18 @@ import {setLocationStorage } from '../../utils/function'
 
 export default ()=>{
   const onFinish = (values: any) => {
-    const {backend, id, secret} = values
-    axios(
-      {url:`http://${backend}/open/auth/token?client_id=${id}&client_secret=${secret}`
+    const {backend, username, password} = values
+    
+    // axios(
+    //   {url:`http://${backend}/open/auth/token?client_id=${id}&client_secret=${secret}`
+    // })
+    axios({
+      url:`http://${backend}/api/login`,
+      method:'post',
+      data:{
+        username,
+        password
+      }
     })
     .then(res=>{
       if(res.data.data.token){
@@ -53,13 +62,21 @@ export default ()=>{
           <Input placeholder='请输入青龙后端（ip:port）' />
         </Form.Item>
 
-        <Form.Item name='id' label='CLIENT ID'>
+        <Form.Item name='username' label='用户名'>
+              <Input placeholder='请输入' />
+        </Form.Item>
+
+        <Form.Item name='password' label='密码'>
+              <Input placeholder='请输入' />
+        </Form.Item>
+
+        {/* <Form.Item name='id' label='CLIENT ID'>
               <Input placeholder='请输入clientid' />
         </Form.Item>
 
         <Form.Item name='secret' label='Client Secret'>
               <Input placeholder='请输入Client Secret' />
-        </Form.Item>
+        </Form.Item> */}
       </Form>
     </div>
   )
