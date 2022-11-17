@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import { Result, Badge, Card, Dialog, TextArea, Button, Search, Form, Input } from 'antd-mobile'
+import React, { useEffect, useState, useRef } from 'react'
+import { Result, Badge, Card, Dialog, TextArea, Button, Form, Input, SearchBar } from 'antd-mobile'
 import { getAction, putAction, postAction } from '../../utils/requests'
 import { Toast, Alert } from '../../utils/utils'
 import style from './index.module.less'
 import cronParse from 'cron-parser';
+
+
 export default class Fuck extends React.Component {
     state = {
         records: [],
@@ -11,7 +13,7 @@ export default class Fuck extends React.Component {
 
         queryParams: {
             searchValue: ''
-        }
+        },
     }
 
     componentDidMount() {
@@ -34,8 +36,7 @@ export default class Fuck extends React.Component {
     */
     handleCardClick = (v) => {
         console.log(v);
-        getAction(`/open/crons/${v.id}/log`, {
-        }).then(res => {
+        getAction(`/open/crons/${v.id}/log`, {}).then(res => {
             console.log(res.data.data);
             // 显示日志内容
             Dialog.show({
@@ -124,41 +125,24 @@ export default class Fuck extends React.Component {
 
 
     render() {
-
         const status = (text) => {
             const status = {
-                0: <Badge content="已启用"
-                    style={{
-                        //  marginLeft: 12,
-                        backgroundColor: '#fff',
-                        borderRadius: 2,
-                        color: '#2ce654',
-                        border: '1px solid #2ce654',
-                    }}
-                />,
-                1: <Badge content="已禁用"
-                    style={{
-                        //  marginLeft: 12,
-                        backgroundColor: '#fff',
-                        borderRadius: 2,
-                        color: '#ec1010',
-                        border: '1px solid #ec1010',
-                    }}
-                />
+                0: <Badge content="已启用" color="#2ce654"/>,
+                1: <Badge content="已禁用" color='#ec1010'/>
             }
             return status[text]
         }
 
         return (<div style={{ margin: '0px auto', width: '90%', marginBottom: '5vh' }}>
             <div style={{ display: 'flex', margin: '10px 0', justifyContent:'space-between' }}>
-                <Button color="primary" size="mini" onClick={this.addSchedule}>添加任务</Button>
-                <Search style={{ '--background': '#ffffff', flexGrow: 0.95 }} placeholder='请输入内容' showCancelButton onSearch={v => this.setState({ queryParams: { searchValue: v } }, this.LoadData)} />
+                <Button style={{width:'6em',marginRight:'10px'}} color="primary" size="mini" onClick={this.addSchedule}>添加任务</Button>
+                <SearchBar style={{ '--background': '#ffffff', flex:1 }} placeholder='请输入内容' showCancelButton onSearch={v => this.setState({ queryParams: { searchValue: v } }, this.LoadData)} />
             </div>
             {this.state.records.map((v, index) => (
                 <div key={index} className={style.card}>
                     <Card onClick={() => this.handleCardClick({ id: v._id, name: v.name })} title={v.name} extra={<div style={{ marginLeft: 10 }}> {status(v.isDisabled)}</div>}>
                         <p>{v.schedule}</p>
-                        <p>{v.status == 0 ? '运行中' : '空闲'}</p>
+                        <p className={style.status}>{v.status == 0 ? '运行中' : '空闲'}</p>
                     </Card>
                     <Button className={style.runbtn} color={v.status == 0 ? "danger" : "primary"}
                         onClick={() => {
