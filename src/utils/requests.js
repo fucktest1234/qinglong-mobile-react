@@ -1,6 +1,6 @@
 import axios from "axios";
 import config from "../config";
-import {getSessionStorage,getLocationStorage} from "./function";
+import {getSessionStorage,getLocationStorage, removeLocationStorage} from "./function";
 
 import { T } from 'react-toast-mobile';
 
@@ -18,10 +18,17 @@ axios.interceptors.request.use(config=> {  // axios请求拦截器
 }); 
 
 axios.interceptors.response.use(response=> { // axios响应拦截器 
+    console.log('resp',response);
+    if(response.status === 401){
+        removeLocationStorage('token')
+    }
     // 对响应数据做点什么
     T.loaded()
     return response; 
 },error=> { // 对响应错误做点什么
+    console.log('resps',error)
+    removeLocationStorage('token')
+    window.location.reload()
     T.loaded()
     return Promise.reject(error); 
 });

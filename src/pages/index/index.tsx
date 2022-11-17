@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import styles from './index.module.less'
-import { Steps, Card, Button, TabBar} from 'antd-mobile'
+import { Steps, Card, Button, TabBar, SearchBar} from 'antd-mobile'
 import { 
   AntDesignOutlined, 
   RightOutlined ,   

@@ -1,11 +1,15 @@
 import React,{useEffect, useState} from 'react'
-import { Result,Badge, Card, Dialog, TextArea, Divider, List, FloatingPanel, Button, Search } from 'antd-mobile'
+import { Result,Badge, Card, Dialog, TextArea, Divider, List, FloatingPanel, Button, SearchBar } from 'antd-mobile'
 import {getAction,putAction} from '../../utils/requests'
 import {Alert} from '../../utils/utils'
 import style from './index.module.less'
 // code editor
 import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
+import 'codemirror/mode/javascript/javascript';
+import 'codemirror/keymap/sublime';
+import 'codemirror/theme/monokai.css';
+
+
 
 
 const anchors = [100, window.innerHeight * 0.4, window.innerHeight * 0.8]
@@ -30,7 +34,7 @@ export default class Fuck extends React.Component{
     }
 
     componentDidMount(){
-        this.LoadData()
+        this.LoadData()  
     }
 
     LoadData = ()=>{
@@ -39,7 +43,7 @@ export default class Fuck extends React.Component{
         }).then(res =>{
             console.log(res.data.data);
             this.setState({
-                records: res.data.data.filter( item=> item.title.indexOf(this.state.queryParams.searchValue)>-1 )
+                records: res.data.data.filter( item=> item.title.indexOf(this.state.queryParams.searchValue)>-1 ).filter( item=> item.title.indexOf('.swp') === -1 )
             })
         })
     }
@@ -53,17 +57,6 @@ export default class Fuck extends React.Component{
                 filename:title,
                 editorValue:res.data.data
             })
-            // 悬浮窗显示文件内容
-            // Dialog.confirm({
-            //     title: title,
-            //     content:  (
-            //         <TextArea
-            //         style={{width:'100%'}}
-            //         defaultValue={res.data.data}
-            //         autoSize={{ minRows: 3 }}
-            //             />
-            //     )
-            //   })
         })
     }
     // 点击保存文件
@@ -72,7 +65,7 @@ export default class Fuck extends React.Component{
         
         const {filename, editorValue} = this.state
         if(filename ===''){
-            Alert('狗球文件都没有选，保存锤子')
+            Alert('p文件都没有选，保存锤子')
             return
         }
         putAction('/open/scripts',{
@@ -129,23 +122,26 @@ export default class Fuck extends React.Component{
                             调整代码区域
                 </Button>
 
-                <CodeMirror
-                    value={this.state.editorValue}
-                    height={this.state.codeHeight}
-                    style={{fontSize:'13px'}}
-                    extensions={[javascript({ jsx: true })]}
-                    onChange={(value, viewUpdate) => {
-                        this.state.editorValue = value // 不触发更新视图，不然卡死
-                        // console.log('value:', value);
-                        // this.setState({
-                        //     editorValue:value
-                        // })
-                    }}
-                />
+                <div style={{minHeight:'600px'}}>
+            <CodeMirror
+                lazyLoadMode={false}
+                value={this.state.editorValue}
+                options={{
+                    theme: 'monokai',
+                    keyMap: 'sublime',
+                    mode: 'js',
+                }}
+                onChange={ (editor, {text})=> {
+                    this.setState({
+                        editorValue:editor.getValue()
+                    })
+                }}
+            />
+        </div>
 
   
                 <FloatingPanel anchors={anchors}>
-                <Search placeholder='请输入内容' showCancelButton onSearch={v=>this.setState({queryParams:{searchValue:v}},this.LoadData)} />
+                <SearchBar placeholder='请输入内容' showCancelButton onSearch={v=>this.setState({queryParams:{searchValue:v}},this.LoadData)} />
                     <List>
                     { this.state.records.map((v,index) => (
                             <List.Item key={index} onClick={()=>this.handleCardClick(v.title)}>

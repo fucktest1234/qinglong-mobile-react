@@ -102,17 +102,13 @@ function App() {
               <Iar/>
           </React.Suspense>
       );break;
-
-      // case 'todo': return <Home value={index}></Home>; break;
-      // case 'mine': return <Result></Result>; break;
       default : return <Other value={'其他'}></Other>; break;
     }
   }
 
   return (
     <div className={styles.app}>
-        <div style={{width:'100%',overflow: 'auto', maxHeight:'90vh',  background:'#f0f0f0'}}>
-          {/* <Scripts/> */}
+        <div style={{width:'100%',overflow: 'auto', maxHeight:'90vh',  background:'#F7FAFF'}}>
           {content(activeKey)}
         </div>
 

@@ -1,158 +1,124 @@
-import React,{useEffect, useState} from 'react'
-import { Result,Badge, Card, Dialog, TextArea, Divider, List, FloatingPanel, Button, Search } from 'antd-mobile'
-import {getAction,postAction} from '../../utils/requests'
-import {Alert} from '../../utils/utils'
-import style from './index.module.less'
+import React, { useEffect, useState, useRef } from 'react'
+import { Dialog, TextArea, Divider, List, FloatingPanel, Button, SearchBar } from 'antd-mobile'
+import { getAction, postAction } from '../../utils/requests'
+import { Alert } from '../../utils/utils'
 // code editor
 import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-
+import 'codemirror/mode/javascript/javascript';
+import 'codemirror/keymap/sublime';
+import 'codemirror/theme/monokai.css';
 
 const anchors = [100, window.innerHeight * 0.4, window.innerHeight * 0.8]
 type FloatingPanelRef = {
     setHeight: (
-      height: number,
-      options?: {
-        immediate?: boolean // 是否跳过动画
-      }
+        height: number,
+        options?: {
+            immediate?: boolean // 是否跳过动画
+        }
     ) => void
-  }
-export default class Fuck extends React.Component{
-    state = {
-        records:[],
-        id:null,
-        // editor
-        editorValue:"//代码区域",
-        filename:'',
-        codeHeight:'600px',
+}
 
-        queryParams:{searchValue:''}
-    }
 
-    componentDidMount(){
-        this.LoadData()
-    }
+// let editorValue = '//代码区域'
+export default () => {
+    const codeRef = useRef()
+    const [editorValue, setEditorValue] = useState('// 1111')
 
-    LoadData = ()=>{
-        getAction('/open/configs/config.sh',{
-            // ...this.state.queryParams
-        }).then(res =>{
-            // console.log(res.data.data);
-            this.setState({
-                editorValue: res.data.data
-                // records: res.data.data.filter( item=> item.title.indexOf(this.state.queryParams.searchValue)>-1 )
-            })
+    const [queryParams, setQueryParams] = useState({})
+    const [filename, setFilename] = useState('')
+    const [codeHeight, setCodeHeight] = useState('600px')
+    // 初始化
+    useEffect(() => {
+        LoadData()
+    }, [])
+
+    useEffect(() => {
+        LoadData()
+    }, [JSON.stringify(queryParams)])
+
+    const LoadData = () => {
+        getAction('/open/configs/config.sh', {
+        }).then(res => {
+            setEditorValue(res.data.data)
         })
     }
     // 点击查看文件内容
-    handleCardClick = title =>{
+    const handleCardClick = title => {
         console.log(title);
-        getAction(`/open/scripts/${title}`,{
-        }).then(res =>{
+        getAction(`/open/scripts/${title}`, {
+        }).then(res => {
             console.log(res.data.data);
-            this.setState({
-                filename:title,
-                editorValue:res.data.data
-            })
-            // 悬浮窗显示文件内容
-            // Dialog.confirm({
-            //     title: title,
-            //     content:  (
-            //         <TextArea
-            //         style={{width:'100%'}}
-            //         defaultValue={res.data.data}
-            //         autoSize={{ minRows: 3 }}
-            //             />
-            //     )
-            //   })
+            setFilename(title)
+            setEditorValue(res.data.data)
         })
     }
     // 点击保存文件
-    handleFileSaving = ()=>{
+    const handleFileSaving = () => {
         console.log('进来否？');
-        
-        let {filename, editorValue} = this.state
-        filename = "config.sh"
+        let savefile = 'config.sh'
         // 只操作了一个config.sh
-        postAction('/open/configs/save',{
-            name:filename,
-            content:editorValue
-        }).then(res=>{
-            if(res.data.code ===200){
+        postAction('/open/configs/save', {
+            name: savefile,
+            content: editorValue
+        }).then(res => {
+            if (res.data.code === 200) {
                 Alert('保存正常')
             }
         })
     }
 
+    return (<div style={{ margin: '0px auto',background:'rgb(39,40,34)' }}>
 
+        <Button color="primary"
+        size='small'
+            onClick={() => {
+                Dialog.show({
+                    title: '确认保存么？',
+                    closeOnAction: true,
+                    actions: [
+                        [
+                            {
+                                key: 'cancel',
+                                text: '取消',
+                            },
+                            {
+                                key: 'confirm',
+                                text: '确认',
+                                bold: true,
+                                danger: true,
+                                onClick: handleFileSaving
+                            },
+                        ],
+                    ],
+                })
+            }
+            }
+        >
+            保存
+        </Button>
 
+        {/* <Button color="primary"
+            onClick={() => {
+                setCodeHeight(codeHeight == '600px' ? '300px' : '600px')
+            }}
+        >
+            调整编辑区域高度
+        </Button> */}
 
-    render(){
-       return (<div style={{margin:'0px auto'}}>
-
-                <Button  color="primary" 
-                            onClick={ ()=>
-                                {
-                                Dialog.show({
-                                    title: '确认保存么？',
-                                    closeOnAction: true,
-                                    actions: [
-                                      [
-                                        {
-                                          key: 'cancel',
-                                          text: '取消',
-                                        },
-                                        {
-                                          key: 'confirm',
-                                          text: '确认',
-                                          bold: true,
-                                          danger: true,
-                                          onClick:this.handleFileSaving
-                                        },
-                                      ],
-                                    ],
-                                  })
-                                }
-                            }
-                        >
-                            保存
-                </Button>
-
-                <Button  color="primary" 
-                        onClick={()=>{
-                            this.setState({
-                                codeHeight:this.state.codeHeight == '600px'?'300px':'600px' 
-                            })
-                        }}
-                        >
-                            调整编辑区域高度
-                </Button>
-
-                <CodeMirror
-                    value={this.state.editorValue}
-                    height={this.state.codeHeight}
-                    style={{fontSize:'13px'}}
-                    extensions={[javascript({ jsx: true })]}
-                    onChange={(value, viewUpdate) => {
-                        this.state.editorValue = value // 不触发更新视图，不然卡死
-                        // console.log('value:', value);
-                        // this.setState({
-                        //     editorValue:value
-                        // })
-                    }}
-                />
-
-  
-                {/* <FloatingPanel anchors={anchors}>
-                <Search placeholder='请输入内容' showCancelButton onSearch={v=>this.setState({queryParams:{searchValue:v}},this.LoadData)} />
-                    <List>
-                    { this.state.records.map((v,index) => (
-                            <List.Item key={index} onClick={()=>this.handleCardClick(v.title)}>
-                                {v.title}
-                            </List.Item>  
-                    ))}
-                    </List>
-                </FloatingPanel> */}
-        </div>)
-    }
+        <div style={{minHeight:'600px'}}>
+            <CodeMirror
+                ref={codeRef}
+                lazyLoadMode={false}
+                value={editorValue}
+                options={{
+                    theme: 'monokai',
+                    keyMap: 'sublime',
+                    mode: 'js',
+                }}
+                onChange={ (editor, {text})=> {
+                   setEditorValue(editor.getValue() )
+                }}
+            />
+        </div>
+    </div>)
 }

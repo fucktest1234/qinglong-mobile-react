@@ -10,11 +10,11 @@ import 'react-toast-mobile/lib/react-toast-mobile.css';
 // github不支持密码提交了？
 
 ReactDOM.render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <div>
       <Toast />
       <App />
-    </div>
-  </React.StrictMode>,
+    </div>,
+  // </React.StrictMode>,
   document.getElementById('root')
 )
